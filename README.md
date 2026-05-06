@@ -16,6 +16,41 @@ Port of the Python script in
 
 ### Wiring
 
+```mermaid
+flowchart LR
+    subgraph Wemos["Wemos D1 mini (ESP8266)"]
+        direction TB
+        W_VCC["3V3"]
+        W_GND["GND"]
+        W_TX["GPIO1<br/>TX / D10"]
+        W_RX["GPIO3<br/>RX / D9"]
+        W_DE["GPIO5<br/>D1"]
+    end
+    subgraph MAX["MAX485 module"]
+        direction TB
+        M_VCC["VCC"]
+        M_GND["GND"]
+        M_DI["DI"]
+        M_RO["RO"]
+        M_DE["DE + RE<br/>(tied)"]
+        M_A["A"]
+        M_B["B"]
+    end
+    subgraph CTRL["G-422 controller"]
+        direction TB
+        C_A["A (RS485+)"]
+        C_B["B (RS485-)"]
+    end
+
+    W_VCC -- "3V3 / 5V" --> M_VCC
+    W_GND --- M_GND
+    W_TX --> M_DI
+    M_RO --> W_RX
+    W_DE -- "HIGH=TX / LOW=RX" --> M_DE
+    M_A --- C_A
+    M_B --- C_B
+```
+
 | Wemos pin       | MAX485 pin       | Notes |
 |---|---|---|
 | 3V3 *(or 5V)*   | VCC              | Most MAX485 modules want 5V; check yours |

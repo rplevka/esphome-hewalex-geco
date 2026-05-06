@@ -1,0 +1,156 @@
+esphome:
+  name: hewalex-zps
+  friendly_name: Hewalex ZPS Solar
+
+esp8266:
+  board: d1_mini
+
+external_components:
+  - source:
+      type: local
+      path: components
+
+# WiFi credentials in secrets.yaml (copy from secrets.yaml.example)
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Hewalex Fallback AP"
+    password: !secret fallback_password
+
+captive_portal:
+
+# Logger pushed to UART1 (TX-only on GPIO2/D4) so UART0 (GPIO1/3) is free for RS485.
+# Connect a USB-TTL adapter to GPIO2 if you want serial console; otherwise OTA logs only.
+logger:
+  hardware_uart: UART1
+  baud_rate: 115200
+  level: DEBUG
+
+api:
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+uart:
+  id: rs485_bus
+  tx_pin: GPIO1   # D10 → MAX485 DI
+  rx_pin: GPIO3   # D9  ← MAX485 RO
+  baud_rate: 38400
+  rx_buffer_size: 256
+
+hewalex_geco:
+  id: hewalex_hub
+  uart_id: rs485_bus
+  flow_control_pin: GPIO5   # D1 → MAX485 DE+RE (tied)
+  target_address: 2
+  source_address: 1
+  update_interval: 30s
+  # Defaults to (100,50)/(150,50)/(200,50). Override here if needed:
+  # register_ranges:
+  #   - start: 100
+  #     count: 50
+  #   - start: 150
+  #     count: 50
+  #   - start: 200
+  #     count: 50
+
+sensor:
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar T1"
+    register: 128
+    decode: signed
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar T2"
+    register: 130
+    decode: signed
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar T3"
+    register: 132
+    decode: signed
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar T4"
+    register: 134
+    decode: signed
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar T5"
+    register: 136
+    decode: signed
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar T6"
+    register: 138
+    decode: signed
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar Power"
+    register: 144
+    decode: unsigned
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 0
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Collector Pump On"
+    register: 150
+    decode: unsigned
+    accuracy_decimals: 0
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar Flow"
+    register: 152
+    decode: signed
+    divisor: 10
+    unit_of_measurement: "l/min"
+    state_class: measurement
+    accuracy_decimals: 1
+
+  - platform: hewalex_geco
+    hewalex_geco_id: hewalex_hub
+    name: "Solar Total Energy"
+    register: 166
+    decode: unsigned
+    divisor: 10
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    accuracy_decimals: 1
